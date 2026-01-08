@@ -10,5 +10,8 @@ namespace TemplateJwtProject.Models
         public string? Wiki { get; set; }
         public string? Biography { get; set; }
         public string? Photo { get; set; }
+
+        // Navigation property
+        public List<Songs> Songs { get; set; } = new List<Songs>();
     }
 }

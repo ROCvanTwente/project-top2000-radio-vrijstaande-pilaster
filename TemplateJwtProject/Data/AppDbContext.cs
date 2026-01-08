@@ -29,5 +29,12 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<RefreshToken>()
             .HasIndex(rt => rt.Token)
             .IsUnique();
+
+        // Artist en Songs relatie (1-op-n) expliciet configureren
+        builder.Entity<Artists>()
+            .HasMany(a => a.Songs)
+            .WithOne(s => s.Artist)
+            .HasForeignKey(s => s.ArtistId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
