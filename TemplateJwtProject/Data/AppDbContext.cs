@@ -36,5 +36,16 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             .WithOne(s => s.Artist)
             .HasForeignKey(s => s.ArtistId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Composite key for Top2000Entries: Position, Year, SongId
+        builder.Entity<Top2000Entries>()
+            .HasKey(t => new { t.Position, t.Year, t.SongId });
+
+        // Relationship Top2000Entries -> Songs
+        builder.Entity<Top2000Entries>()
+            .HasOne(t => t.Song)
+            .WithMany()
+            .HasForeignKey(t => t.SongId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
