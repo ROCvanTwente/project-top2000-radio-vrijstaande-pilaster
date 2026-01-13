@@ -1,14 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using TemplateJwtProject.Models;
 
-public class Top2000Entries
+namespace TemplateJwtProject.Models
 {
-    [Key]
-    public int Top2000EntryId { get; set; }
+    public class Top2000Entries
+    {
+        public int SongId { get; set; }
+        public Songs? Song { get; set; }
 
-    public int SongId { get; set; }
-    public Songs? Song { get; set; }
-
-    public int Year { get; set; }
-    public int Position { get; set; }
+        public int Year { get; set; }
+        public int Position { get; set; }
+    }
 }

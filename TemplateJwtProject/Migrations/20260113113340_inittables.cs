@@ -5,7 +5,7 @@
 namespace TemplateJwtProject.Migrations
 {
     /// <inheritdoc />
-    public partial class finalmigration : Migration
+    public partial class inittables : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -54,15 +54,13 @@ namespace TemplateJwtProject.Migrations
                 name: "Top2000Entries",
                 columns: table => new
                 {
-                    Top2000EntryId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
                     SongId = table.Column<int>(type: "int", nullable: false),
                     Year = table.Column<int>(type: "int", nullable: false),
                     Position = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Top2000Entries", x => x.Top2000EntryId);
+                    table.PrimaryKey("PK_Top2000Entries", x => new { x.Position, x.Year, x.SongId });
                     table.ForeignKey(
                         name: "FK_Top2000Entries_Songs_SongId",
                         column: x => x.SongId,

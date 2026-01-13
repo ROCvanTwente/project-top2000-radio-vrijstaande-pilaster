@@ -319,24 +319,18 @@ namespace TemplateJwtProject.Migrations
                     b.ToTable("Songs");
                 });
 
-            modelBuilder.Entity("Top2000Entries", b =>
+            modelBuilder.Entity("TemplateJwtProject.Models.Top2000Entries", b =>
                 {
-                    b.Property<int>("Top2000EntryId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Top2000EntryId"));
-
                     b.Property<int>("Position")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SongId")
                         .HasColumnType("int");
 
                     b.Property<int>("Year")
                         .HasColumnType("int");
 
-                    b.HasKey("Top2000EntryId");
+                    b.Property<int>("SongId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Position", "Year", "SongId");
 
                     b.HasIndex("SongId");
 
@@ -408,7 +402,7 @@ namespace TemplateJwtProject.Migrations
             modelBuilder.Entity("TemplateJwtProject.Models.Songs", b =>
                 {
                     b.HasOne("TemplateJwtProject.Models.Artists", "Artist")
-                        .WithMany()
+                        .WithMany("Songs")
                         .HasForeignKey("ArtistId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -416,7 +410,7 @@ namespace TemplateJwtProject.Migrations
                     b.Navigation("Artist");
                 });
 
-            modelBuilder.Entity("Top2000Entries", b =>
+            modelBuilder.Entity("TemplateJwtProject.Models.Top2000Entries", b =>
                 {
                     b.HasOne("TemplateJwtProject.Models.Songs", "Song")
                         .WithMany()
@@ -425,6 +419,11 @@ namespace TemplateJwtProject.Migrations
                         .IsRequired();
 
                     b.Navigation("Song");
+                });
+
+            modelBuilder.Entity("TemplateJwtProject.Models.Artists", b =>
+                {
+                    b.Navigation("Songs");
                 });
 #pragma warning restore 612, 618
         }
