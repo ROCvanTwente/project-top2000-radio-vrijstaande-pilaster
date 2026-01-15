@@ -85,17 +85,19 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    
     await RoleInitializer.InitializeAsync(services);
 
     // Maak eerste admin aan indien deze niet bestaat
     var configuration = services.GetRequiredService<IConfiguration>();
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
     
-    var adminEmail = configuration["AdminUser:Email"] ?? "admin@example.com";
+    var adminEmail = configuration["AdminUser:Email"];
     var adminPassword = configuration["AdminUser:Password"];
     
-    // Alleen aanmaken als er een wachtwoord is geconfigureerd
-    if (!string.IsNullOrEmpty(adminPassword))
+    // Alleen aanmaken als er zowel een email als wachtwoord is geconfigureerd
+    if (!string.IsNullOrEmpty(adminEmail) && !string.IsNullOrEmpty(adminPassword))
     {
         var adminUser = await userManager.FindByEmailAsync(adminEmail);
 
@@ -114,11 +116,11 @@ using (var scope = app.Services.CreateScope())
             {
                 await userManager.AddToRoleAsync(adminUser, Roles.Admin);
                 await userManager.AddToRoleAsync(adminUser, Roles.User);
-                Console.WriteLine($"✓ Admin user created: {adminEmail}");
+                logger.LogInformation("Admin user created successfully with email: {Email}", adminEmail);
             }
             else
             {
-                Console.WriteLine($"✗ Failed to create admin user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                logger.LogError("Failed to create admin user. Error count: {ErrorCount}", result.Errors.Count());
             }
         }
     }
