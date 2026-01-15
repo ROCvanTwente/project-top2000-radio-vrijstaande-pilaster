@@ -79,7 +79,7 @@ development omgeving kunnen doen naar:  https://localhost:7003/api/auth/register
     "RefreshTokenExpiryInDays": "7"
   },
   "AdminUser": {
-    "Email": "admin@example.com",
+    "Email": "your-admin@yourdomain.com",
     "Password": ""
   },
   "CorsSettings": {

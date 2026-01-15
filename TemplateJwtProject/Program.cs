@@ -116,7 +116,7 @@ using (var scope = app.Services.CreateScope())
             {
                 await userManager.AddToRoleAsync(adminUser, Roles.Admin);
                 await userManager.AddToRoleAsync(adminUser, Roles.User);
-                logger.LogInformation("Admin user created successfully with email: {Email}", adminEmail);
+                logger.LogInformation("Admin user created successfully");
             }
             else
             {
