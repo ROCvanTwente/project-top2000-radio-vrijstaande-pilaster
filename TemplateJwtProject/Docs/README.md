@@ -78,6 +78,10 @@ development omgeving kunnen doen naar:  https://localhost:7003/api/auth/register
     "ExpiryInMinutes": "60",
     "RefreshTokenExpiryInDays": "7"
   },
+  "AdminUser": {
+    "Email": "admin@example.com",
+    "Password": ""
+  },
   "CorsSettings": {
     "AllowedOrigins": [
       "http://localhost:1234",
@@ -90,8 +94,15 @@ development omgeving kunnen doen naar:  https://localhost:7003/api/auth/register
 **⚠️ BELANGRIJK**: 
 - Verander de `SecretKey` in productie naar een veilige, random gegenereerde key!
 - Pas `AllowedOrigins` aan voor je productie frontend URL's
+- **AdminUser.Password**: Leeg laten in appsettings.json! Stel dit in via omgevingsvariabelen of user secrets voor beveiliging
 - **Access Token**: 60 minuten (kort voor beveiliging)
 - **Refresh Token**: 7 dagen (lang voor gebruikerservaring)
+
+**AdminUser configuratie:**
+De admin gebruiker wordt automatisch aangemaakt bij opstarten als het `AdminUser:Password` veld is ingesteld via:
+- Omgevingsvariabelen: `export AdminUser__Password="SecurePassword123!"`
+- User Secrets (development): `dotnet user-secrets set "AdminUser:Password" "SecurePassword123!"`
+- Azure App Settings / Environment Variables (production)
 
 ### CORS Configuratie
 
