@@ -5,7 +5,7 @@
 namespace TemplateJwtProject.Migrations
 {
     /// <inheritdoc />
-    public partial class inittables : Migration
+    public partial class InitTables : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

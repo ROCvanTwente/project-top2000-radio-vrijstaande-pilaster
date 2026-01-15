@@ -81,40 +81,45 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// Initialiseer rollen
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    await RoleInitializer.InitializeAsync(services);
-}
-
-// Initialiseer rollen
+// Initialiseer rollen en eerste admin gebruiker
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     await RoleInitializer.InitializeAsync(services);
 
-    // Maak eerste admin aan
+    // Maak eerste admin aan indien deze niet bestaat
+    var configuration = services.GetRequiredService<IConfiguration>();
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-    var adminEmail = "admin@example.com";
-    var adminUser = await userManager.FindByEmailAsync(adminEmail);
-
-    if (adminUser == null)
+    
+    var adminEmail = configuration["AdminUser:Email"] ?? "admin@example.com";
+    var adminPassword = configuration["AdminUser:Password"];
+    
+    // Alleen aanmaken als er een wachtwoord is geconfigureerd
+    if (!string.IsNullOrEmpty(adminPassword))
     {
-        adminUser = new ApplicationUser
-        {
-            UserName = adminEmail,
-            Email = adminEmail,
-            EmailConfirmed = true
-        };
+        var adminUser = await userManager.FindByEmailAsync(adminEmail);
 
-        var result = await userManager.CreateAsync(adminUser, "Admin123!");
-
-        if (result.Succeeded)
+        if (adminUser == null)
         {
-            await userManager.AddToRoleAsync(adminUser, Roles.Admin);
-            await userManager.AddToRoleAsync(adminUser, Roles.User);
-            Console.WriteLine($"? Admin user created: {adminEmail}");
+            adminUser = new ApplicationUser
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                EmailConfirmed = true
+            };
+
+            var result = await userManager.CreateAsync(adminUser, adminPassword);
+
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(adminUser, Roles.Admin);
+                await userManager.AddToRoleAsync(adminUser, Roles.User);
+                Console.WriteLine($"✓ Admin user created: {adminEmail}");
+            }
+            else
+            {
+                Console.WriteLine($"✗ Failed to create admin user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            }
         }
     }
 }

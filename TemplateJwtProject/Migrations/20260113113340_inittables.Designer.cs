@@ -13,7 +13,7 @@ namespace TemplateJwtProject.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260113113340_inittables")]
-    partial class inittables
+    partial class InitTables
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
