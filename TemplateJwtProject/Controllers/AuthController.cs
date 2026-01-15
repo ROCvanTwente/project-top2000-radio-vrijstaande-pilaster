@@ -8,6 +8,9 @@ using TemplateJwtProject.Services;
 
 namespace TemplateJwtProject.Controllers;
 
+/// <summary>
+/// Controller for authentication operations including registration, login, and token management.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
@@ -35,6 +38,13 @@ public class AuthController : ControllerBase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Registers a new user account with the User role.
+    /// </summary>
+    /// <param name="model">The registration details including email and password.</param>
+    /// <returns>Returns authentication tokens and user details on successful registration.</returns>
+    /// <response code="200">Returns the newly created user's authentication tokens.</response>
+    /// <response code="400">If the registration data is invalid or the email is already registered.</response>
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto model)
     {
@@ -77,6 +87,13 @@ public class AuthController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Authenticates a user and returns JWT tokens.
+    /// </summary>
+    /// <param name="model">The login credentials including email and password.</param>
+    /// <returns>Returns authentication tokens and user details on successful login.</returns>
+    /// <response code="200">Returns the user's authentication tokens.</response>
+    /// <response code="401">If the credentials are invalid.</response>
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto model)
     {
@@ -112,6 +129,13 @@ public class AuthController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Refreshes an expired access token using a valid refresh token.
+    /// </summary>
+    /// <param name="model">The refresh token to validate.</param>
+    /// <returns>Returns new authentication tokens if the refresh token is valid.</returns>
+    /// <response code="200">Returns new authentication tokens.</response>
+    /// <response code="401">If the refresh token is invalid or expired.</response>
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDto model)
     {
@@ -150,6 +174,13 @@ public class AuthController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Revokes a specific refresh token, preventing it from being used again.
+    /// </summary>
+    /// <param name="model">The refresh token to revoke.</param>
+    /// <returns>Returns a success message if the token was revoked.</returns>
+    /// <response code="200">Token revoked successfully.</response>
+    /// <response code="401">If the user is not authenticated.</response>
     [HttpPost("revoke-token")]
     [Authorize]
     public async Task<IActionResult> RevokeToken([FromBody] RefreshTokenDto model)
@@ -164,6 +195,12 @@ public class AuthController : ControllerBase
         return Ok(new { message = "Token revoked successfully" });
     }
 
+    /// <summary>
+    /// Revokes all refresh tokens for the authenticated user, effectively logging them out from all devices.
+    /// </summary>
+    /// <returns>Returns a success message if all tokens were revoked.</returns>
+    /// <response code="200">All tokens revoked successfully.</response>
+    /// <response code="401">If the user is not authenticated.</response>
     [HttpPost("logout-all")]
     [Authorize]
     public async Task<IActionResult> LogoutFromAllDevices()

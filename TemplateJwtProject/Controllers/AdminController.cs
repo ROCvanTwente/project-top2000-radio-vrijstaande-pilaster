@@ -8,6 +8,10 @@ using TemplateJwtProject.Models.DTOs;
 
 namespace TemplateJwtProject.Controllers;
 
+/// <summary>
+/// Controller for administrative operations including user management and role assignment.
+/// Requires Admin role for all endpoints.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 [Authorize(Roles = Roles.Admin)]
@@ -24,6 +28,14 @@ public class AdminController : ControllerBase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Assigns a role to a user.
+    /// </summary>
+    /// <param name="model">The user email and role to assign.</param>
+    /// <returns>Returns the updated user information with roles.</returns>
+    /// <response code="200">Role assigned successfully.</response>
+    /// <response code="400">If the role is invalid or user already has the role.</response>
+    /// <response code="404">If the user is not found.</response>
     [HttpPost("assign-role")]
     public async Task<IActionResult> AssignRole([FromBody] AssignRoleDto model)
     {
@@ -67,6 +79,14 @@ public class AdminController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Removes a role from a user.
+    /// </summary>
+    /// <param name="model">The user email and role to remove.</param>
+    /// <returns>Returns the updated user information with roles.</returns>
+    /// <response code="200">Role removed successfully.</response>
+    /// <response code="400">If the user does not have the specified role.</response>
+    /// <response code="404">If the user is not found.</response>
     [HttpPost("remove-role")]
     public async Task<IActionResult> RemoveRole([FromBody] AssignRoleDto model)
     {
@@ -103,6 +123,11 @@ public class AdminController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Retrieves a list of all users with their assigned roles.
+    /// </summary>
+    /// <returns>Returns a list of users with their email, username, and roles.</returns>
+    /// <response code="200">Returns the list of all users.</response>
     [HttpGet("users")]
     public async Task<IActionResult> GetAllUsers()
     {
