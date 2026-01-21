@@ -10,6 +10,23 @@ using TemplateJwtProject.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:3000", 
+                "http://localhost:5173", 
+                "http://localhost:5174", 
+                "https://localhost:5174",
+				"http://http://localhost:5237")
+
+				  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
+
 // Add services to the container.
 
 // Database configuratie
@@ -60,6 +77,7 @@ builder.Services.AddAuthentication(options =>
 var corsSettings = builder.Configuration.GetSection("CorsSettings");
 var allowedOrigins = corsSettings.GetSection("AllowedOrigins").Get<string[]>() ?? new[] { "http://localhost:1234" };
 
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("DefaultCorsPolicy", policy =>
@@ -77,7 +95,13 @@ builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+
+// Register Swagger only in development
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
+}
 
 var app = builder.Build();
 
@@ -119,16 +143,26 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// Ensure endpoint routing is enabled so CORS middleware runs for routed endpoints
+app.UseRouting();
 
 // CORS middleware (voor Authentication en Authorization!)
-app.UseCors("DefaultCorsPolicy");
+// Apply the policy that permits the React dev origin so preflight requests get the
+// appropriate Access-Control-Allow-* headers. Run CORS before HTTPS redirection so
+// preflight OPTIONS requests are not redirected without CORS headers.
+app.UseCors("AllowReactApp");
+
+// Redirect HTTP to HTTPS after CORS has been applied (prevents redirect responses
+// from lacking CORS headers during preflight).
+app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
