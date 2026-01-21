@@ -80,8 +80,9 @@ development omgeving kunnen doen naar:  https://localhost:7003/api/auth/register
   },
   "CorsSettings": {
     "AllowedOrigins": [
-      "http://localhost:1234",
-      "https://localhost:1234"
+       "http://localhost:5173",
+      "http://localhost:5237",
+      "https://localhost:7003"
     ]
   }
 }

@@ -35,5 +35,27 @@ namespace TemplateJwtProject.Controllers
             return Ok(song);
         }
 
+
+        [HttpGet("top5")]
+        public async Task<ActionResult> GetTop5Songs()
+        {
+            var top5 = await (
+                from t in _context.Top2000Entries
+                join s in _context.Songs on t.SongId equals s.SongId
+                join a in _context.Artists on s.ArtistId equals a.ArtistId
+                where t.Year == 2024 && t.Position >= 1 && t.Position <= 5
+                orderby t.Position
+                select new
+                {
+                    t.Position,
+                    s.Title,
+                    Artist = a.Name
+                }
+            ).ToListAsync();
+
+            return Ok(top5);
+        }
+
+
     }
 }
