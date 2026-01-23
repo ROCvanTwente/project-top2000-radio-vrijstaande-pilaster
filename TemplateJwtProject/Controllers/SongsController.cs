@@ -34,6 +34,7 @@ namespace TemplateJwtProject.Controllers
                 select new
                 {
                     s.Title,
+                    a.ArtistId,
                     Artist = a.Name,
                     t.Position,
                     t.Year,
