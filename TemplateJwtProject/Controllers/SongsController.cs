@@ -25,12 +25,23 @@ namespace TemplateJwtProject.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Songs>> GetSong(int id)
         {
-            var song = await _context.Songs.FindAsync(id);
+            var song = await (
+                from t in _context.Top2000Entries
+                join s in _context.Songs on t.SongId equals s.SongId
+                join a in _context.Artists on s.ArtistId equals a.ArtistId
+                where s.SongId == id
+                orderby t.Year
+                select new
+                {
+                    s.Title,
+                    Artist = a.Name,
+                    t.Position,
+                    t.Year,
+                    s.Lyrics,
+                    s.ImgUrl
 
-            if (song == null)
-            {
-                return NotFound();
-            }
+                }
+            ).ToListAsync();
 
             return Ok(song);
         }
@@ -47,6 +58,8 @@ namespace TemplateJwtProject.Controllers
                 orderby t.Position
                 select new
                 {
+                    s.SongId,
+                    a.ArtistId,
                     t.Position,
                     s.Title,
                     Artist = a.Name
@@ -56,6 +69,52 @@ namespace TemplateJwtProject.Controllers
             return Ok(top5);
         }
 
+        [HttpGet("fulllist")]
+        public async Task<ActionResult> GetFullList([FromQuery] int year, string? order)
+        {
+            // Optional: set a default if no year is provided
+            if (year == 0) year = 2024;
 
+            Console.WriteLine(order);
+
+            var query = from t in _context.Top2000Entries
+                        join s in _context.Songs on t.SongId equals s.SongId
+                        join a in _context.Artists on s.ArtistId equals a.ArtistId
+                        where t.Year == year
+                        select new
+                        {
+                            t.Year,
+                            s.SongId,
+                            t.Position,
+                            s.Title,
+                            Artist = a.Name,
+                            s.ArtistId
+                        };
+
+            // Apply ordering based on the order parameter
+            if (!string.IsNullOrEmpty(order))
+            {
+                if (order.Equals("ASC", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = query.OrderBy(x => x.Title);
+                }
+                else if (order.Equals("DESC", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = query.OrderByDescending(x => x.Title);
+                }
+                else
+                {
+                    query = query.OrderBy(x => x.Position);
+                }
+            }
+            else
+            {
+                query = query.OrderBy(x => x.Position);
+            }
+
+            var list = await query.ToListAsync();
+
+            return Ok(list);
+        }
     }
 }
