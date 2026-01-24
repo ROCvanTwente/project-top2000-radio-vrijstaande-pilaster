@@ -91,37 +91,6 @@ using (var scope = app.Services.CreateScope())
     await RoleInitializer.InitializeAsync(services);
 }
 
-// Initialiseer rollen
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    await RoleInitializer.InitializeAsync(services);
-
-    // Maak eerste admin aan
-    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-    var adminEmail = "admin@example.com";
-    var adminUser = await userManager.FindByEmailAsync(adminEmail);
-
-    if (adminUser == null)
-    {
-        adminUser = new ApplicationUser
-        {
-            UserName = adminEmail,
-            Email = adminEmail,
-            EmailConfirmed = true
-        };
-
-        var result = await userManager.CreateAsync(adminUser, "Admin123!");
-
-        if (result.Succeeded)
-        {
-            await userManager.AddToRoleAsync(adminUser, Roles.Admin);
-            await userManager.AddToRoleAsync(adminUser, Roles.User);
-            Console.WriteLine($"? Admin user created: {adminEmail}");
-        }
-    }
-}
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -130,8 +99,6 @@ if (app.Environment.IsDevelopment())
 
 // CORS middleware (voor Authentication en Authorization!)
 /*app.UseCors("DefaultCorsPolicy");*/
-
-
 
 app.UseHttpsRedirection();
 
