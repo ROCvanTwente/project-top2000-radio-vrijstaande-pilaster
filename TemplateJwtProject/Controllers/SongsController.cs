@@ -56,6 +56,8 @@ namespace TemplateJwtProject.Controllers
                 orderby t.Year
                 select new
                 {
+                    s.Youtube,
+                    s.SongId,
                     s.Title,
                     a.ArtistId,
                     Artist = a.Name,
