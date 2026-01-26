@@ -41,21 +41,28 @@ public class AuthController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
+        var userFound = await _userManager.FindByEmailAsync(model.Email);
+        if (userFound != null)
+        {
+            return BadRequest(new
+            {
+                errors = "Email is already registered"
+            });
+        }
+
         var user = new ApplicationUser
         {
             UserName = model.Email,
             Email = model.Email
         };
-
         var result = await _userManager.CreateAsync(user, model.Password);
 
         if (!result.Succeeded)
         {
-            foreach (var error in result.Errors)
+            return BadRequest(new
             {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
-            return BadRequest(ModelState);
+                errors = result.Errors.Select(e => e.Description).ToArray()
+            });
         }
 
         // Wijs standaard de "User" rol toe

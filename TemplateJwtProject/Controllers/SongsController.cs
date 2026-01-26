@@ -16,9 +16,32 @@ namespace TemplateJwtProject.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Songs>>> GetSongs()
+        public async Task<ActionResult<IEnumerable<Songs>>> GetSongs(int page = 1)
         {
-            var songs = await _context.Songs.ToListAsync();
+            const int pageSize = 20;
+
+            var songs = await (
+                from t in _context.Top2000Entries
+                join s in _context.Songs on t.SongId equals s.SongId
+                join a in _context.Artists on s.ArtistId equals a.ArtistId
+                select new
+                {
+                    s.Title,
+                    s.SongId,
+                    s.ImgUrl,
+                    a.ArtistId,
+                    ArtistName = a.Name,
+                    s.ReleaseYear,
+                    Noteringen = _context.Top2000Entries.Count(t => t.SongId == s.SongId)
+                }
+            )
+            .Distinct()
+            .OrderByDescending(x => x.Noteringen)
+            .ThenBy(s => s.SongId)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
             return Ok(songs);
         }
 
@@ -33,13 +56,16 @@ namespace TemplateJwtProject.Controllers
                 orderby t.Year
                 select new
                 {
+                    s.Youtube,
+                    s.SongId,
                     s.Title,
+                    a.ArtistId,
                     Artist = a.Name,
                     t.Position,
                     t.Year,
                     s.Lyrics,
-                    s.ImgUrl
-
+                    s.ImgUrl,
+                    s.ReleaseYear
                 }
             ).ToListAsync();
 
@@ -50,48 +76,75 @@ namespace TemplateJwtProject.Controllers
         [HttpGet("top5")]
         public async Task<ActionResult> GetTop5Songs()
         {
-            var top5 = await (
+            var year = 2024;
+
+            var previousYear = year - 1;
+
+            var query =
                 from t in _context.Top2000Entries
                 join s in _context.Songs on t.SongId equals s.SongId
                 join a in _context.Artists on s.ArtistId equals a.ArtistId
-                where t.Year == 2024 && t.Position >= 1 && t.Position <= 5
+                where t.Year == year
                 orderby t.Position
+                let lastYearPosition = _context.Top2000Entries
+                    .Where(py => py.SongId == s.SongId && py.Year == previousYear)
+                    .Select(py => (int?)py.Position)
+                    .FirstOrDefault()
                 select new
                 {
-                    s.SongId,
-                    a.ArtistId,
-                    t.Position,
                     s.Title,
-                    Artist = a.Name
-                }
-            ).ToListAsync();
+                    s.SongId,
+                    s.ImgUrl,
+                    a.ArtistId,
+                    ArtistName = a.Name,
+                    s.ReleaseYear,
+                    Noteringen = _context.Top2000Entries.Count(te => te.SongId == s.SongId),
+                    t.Position,
+                    t.Year,
 
-            return Ok(top5);
+                    PositionDifference = lastYearPosition.HasValue
+                        ? (lastYearPosition.Value - t.Position).ToString()
+                        : "Nieuw"
+                };
+
+            var list = await query.Take(5).ToListAsync();
+
+            return Ok(list);
         }
 
         [HttpGet("fulllist")]
         public async Task<ActionResult> GetFullList([FromQuery] int year, string? order)
         {
-            // Optional: set a default if no year is provided
             if (year == 0) year = 2024;
 
-            Console.WriteLine(order);
+            var previousYear = year - 1;
 
-            var query = from t in _context.Top2000Entries
-                        join s in _context.Songs on t.SongId equals s.SongId
-                        join a in _context.Artists on s.ArtistId equals a.ArtistId
-                        where t.Year == year
-                        select new
-                        {
-                            t.Year,
-                            s.SongId,
-                            t.Position,
-                            s.Title,
-                            Artist = a.Name,
-                            s.ArtistId
-                        };
+            var query =
+                from t in _context.Top2000Entries
+                join s in _context.Songs on t.SongId equals s.SongId
+                join a in _context.Artists on s.ArtistId equals a.ArtistId
+                where t.Year == year
+                let lastYearPosition = _context.Top2000Entries
+                    .Where(py => py.SongId == s.SongId && py.Year == previousYear)
+                    .Select(py => (int?)py.Position)
+                    .FirstOrDefault()
+                select new
+                {
+                    s.Title,
+                    s.SongId,
+                    s.ImgUrl,
+                    a.ArtistId,
+                    ArtistName = a.Name,
+                    s.ReleaseYear,
+                    Noteringen = _context.Top2000Entries.Count(te => te.SongId == s.SongId),
+                    t.Position,
+                    t.Year,
 
-            // Apply ordering based on the order parameter
+                    PositionDifference = lastYearPosition.HasValue
+                        ? (lastYearPosition.Value - t.Position).ToString()
+                        : "Nieuw"
+                };
+
             if (!string.IsNullOrEmpty(order))
             {
                 if (order.Equals("ASC", StringComparison.OrdinalIgnoreCase))

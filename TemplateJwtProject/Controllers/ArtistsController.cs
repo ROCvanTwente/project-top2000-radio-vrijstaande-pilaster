@@ -18,9 +18,28 @@ namespace TemplateJwtProject.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Artists>>> GetArtists()
+        public async Task<ActionResult<IEnumerable<Artists>>> GetArtists(int page = 1)
         {
-            var artists = await _context.Artists.ToListAsync();
+            const int pageSize = 20;
+
+            var artists = await (
+
+                from a in _context.Artists
+                
+                select new {
+                    a.ArtistId,
+                    a.Photo,
+                    a.Name,
+                    Noteringen = _context.Songs.Count(s => s.ArtistId == a.ArtistId)
+                }
+
+            )
+            .OrderByDescending(x => x.Noteringen)
+            .ThenBy(x => x.ArtistId)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
             return Ok(artists);
         }
 
