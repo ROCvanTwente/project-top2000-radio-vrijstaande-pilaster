@@ -14,6 +14,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Artists> Artists { get; set; }
     public DbSet<Songs> Songs { get; set; }
     public DbSet<Top2000Entries> Top2000Entries { get; set; }
+    public DbSet<UserPlaylists> UserPlaylists { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -47,5 +48,9 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             .WithMany()
             .HasForeignKey(t => t.SongId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Composite key for UserPlaylists: UserId, SongId
+        builder.Entity<UserPlaylists>()
+            .HasKey(up => new { up.UserId, up.SongId });
     }
 }
