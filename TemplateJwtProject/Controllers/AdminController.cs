@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using TemplateJwtProject.Constants;
 using TemplateJwtProject.Models;
 using TemplateJwtProject.Models.DTOs;
+using System.Security.Claims;
 
 namespace TemplateJwtProject.Controllers;
 
@@ -29,48 +30,78 @@ public class AdminController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(currentUserId))
+        {
+            return Unauthorized();
+        }
+
         var user = await _userManager.FindByEmailAsync(model.Email);
         if (user == null)
         {
             return NotFound(new { message = "User not found" });
         }
 
-        // Valideer of de rol bestaat
-        if (model.Role != Roles.Admin && model.Role != Roles.User)
+        if (user.Id == currentUserId)
         {
-            return BadRequest(new { message = $"Invalid role. Valid roles are: {Roles.Admin}, {Roles.User}" });
+            return BadRequest(new
+            {
+                message = "You cannot change roles on your own account."
+            });
         }
 
-        // Check of gebruiker al deze rol heeft
+        if (model.Role != Roles.Admin && model.Role != Roles.User)
+        {
+            return BadRequest(new
+            {
+                message = $"Invalid role. Valid roles are: {Roles.Admin}, {Roles.User}"
+            });
+        }
+
         if (await _userManager.IsInRoleAsync(user, model.Role))
         {
-            return BadRequest(new { message = $"User already has the {model.Role} role" });
+            return BadRequest(new
+            {
+                message = $"User already has the {model.Role} role"
+            });
         }
 
         var result = await _userManager.AddToRoleAsync(user, model.Role);
-        
+
         if (!result.Succeeded)
         {
-            return BadRequest(new { message = "Failed to assign role", errors = result.Errors });
+            return BadRequest(new
+            {
+                message = "Failed to assign role",
+                errors = result.Errors
+            });
         }
 
-        _logger.LogInformation("Admin assigned role {Role} to user {Email}", model.Role, model.Email);
-
         var roles = await _userManager.GetRolesAsync(user);
-        
-        return Ok(new 
-        { 
+
+        return Ok(new
+        {
             message = $"Role {model.Role} assigned successfully",
             email = user.Email,
-            roles = roles
+            roles
         });
     }
+
 
     [HttpPost("remove-role")]
     public async Task<IActionResult> RemoveRole([FromBody] AssignRoleDto model)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
+        var claims = User.Claims.Select(c => new { c.Type, c.Value });
+
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(currentUserId))
+        {
+            return Unauthorized();
+        }
 
         var user = await _userManager.FindByEmailAsync(model.Email);
         if (user == null)
@@ -78,29 +109,43 @@ public class AdminController : ControllerBase
             return NotFound(new { message = "User not found" });
         }
 
+        if (user.Id == currentUserId)
+        {
+            return BadRequest(new
+            {
+                message = "You cannot change roles on your own account."
+            });
+        }
+
         if (!await _userManager.IsInRoleAsync(user, model.Role))
         {
-            return BadRequest(new { message = $"User does not have the {model.Role} role" });
+            return BadRequest(new
+            {
+                message = $"User does not have the {model.Role} role"
+            });
         }
 
         var result = await _userManager.RemoveFromRoleAsync(user, model.Role);
-        
+
         if (!result.Succeeded)
         {
-            return BadRequest(new { message = "Failed to remove role", errors = result.Errors });
+            return BadRequest(new
+            {
+                message = "Failed to remove role",
+                errors = result.Errors
+            });
         }
 
-        _logger.LogInformation("Admin removed role {Role} from user {Email}", model.Role, model.Email);
-
         var roles = await _userManager.GetRolesAsync(user);
-        
-        return Ok(new 
-        { 
+
+        return Ok(new
+        {
             message = $"Role {model.Role} removed successfully",
             email = user.Email,
-            roles = roles
+            roles
         });
     }
+
 
     [HttpGet("users")]
     public async Task<IActionResult> GetAllUsers()
@@ -123,4 +168,46 @@ public class AdminController : ControllerBase
 
         return Ok(userList);
     }
+
+    [HttpDelete("delete-user/{userId}")]
+    public async Task<IActionResult> DeleteUser(string userId)
+    {
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(currentUserId))
+            return Unauthorized();
+
+        if (userId == currentUserId)
+        {
+            return BadRequest(new
+            {
+                message = "You cannot delete your own account."
+            });
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return NotFound(new { message = "User not found" });
+        }
+
+        var result = await _userManager.DeleteAsync(user);
+
+        if (!result.Succeeded)
+        {
+            return BadRequest(new
+            {
+                message = "Failed to delete user",
+                errors = result.Errors
+            });
+        }
+
+
+        return Ok(new
+        {
+            message = "User deleted successfully",
+            userId
+        });
+    }
+
 }
