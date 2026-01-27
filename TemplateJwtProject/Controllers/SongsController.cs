@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using TemplateJwtProject.Models;
 
 namespace TemplateJwtProject.Controllers
@@ -15,9 +17,13 @@ namespace TemplateJwtProject.Controllers
             _context = context;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Songs>>> GetSongs(int page = 1)
         {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var isAuthenticated = !string.IsNullOrEmpty(userId);
+
             const int pageSize = 20;
 
             var songs = await (
@@ -32,7 +38,8 @@ namespace TemplateJwtProject.Controllers
                     a.ArtistId,
                     ArtistName = a.Name,
                     s.ReleaseYear,
-                    Noteringen = _context.Top2000Entries.Count(t => t.SongId == s.SongId)
+                    Noteringen = _context.Top2000Entries.Count(t => t.SongId == s.SongId),
+                    IsLiked = isAuthenticated && _context.UserPlaylists.Any(up => up.UserId == userId && up.SongId == s.SongId)
                 }
             )
             .Distinct()
@@ -45,9 +52,13 @@ namespace TemplateJwtProject.Controllers
             return Ok(songs);
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<ActionResult<Songs>> GetSong(int id)
         {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var isAuthenticated = !string.IsNullOrEmpty(userId);
+
             var song = await (
                 from t in _context.Top2000Entries
                 join s in _context.Songs on t.SongId equals s.SongId
@@ -65,22 +76,25 @@ namespace TemplateJwtProject.Controllers
                     t.Year,
                     s.Lyrics,
                     s.ImgUrl,
-                    s.ReleaseYear
+                    s.ReleaseYear,
+                    IsLiked = isAuthenticated && _context.UserPlaylists.Any(up => up.UserId == userId && up.SongId == s.SongId)
                 }
             ).ToListAsync();
 
             return Ok(song);
         }
 
-
+        [AllowAnonymous]
         [HttpGet("top5")]
         public async Task<ActionResult> GetTop5Songs()
         {
-            var year = 2024;
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var isAuthenticated = !string.IsNullOrEmpty(userId);
 
+            var year = 2024;
             var previousYear = year - 1;
 
-            var query =
+            var songs = await (
                 from t in _context.Top2000Entries
                 join s in _context.Songs on t.SongId equals s.SongId
                 join a in _context.Artists on s.ArtistId equals a.ArtistId
@@ -104,17 +118,22 @@ namespace TemplateJwtProject.Controllers
 
                     PositionDifference = lastYearPosition.HasValue
                         ? (lastYearPosition.Value - t.Position).ToString()
-                        : "Nieuw"
-                };
+                        : "Nieuw",
 
-            var list = await query.Take(5).ToListAsync();
+                    IsLiked = isAuthenticated && _context.UserPlaylists.Any(up => up.UserId == userId && up.SongId == s.SongId)
 
-            return Ok(list);
+
+                }).Take(5).ToListAsync();
+
+            return Ok(songs);
         }
 
         [HttpGet("fulllist")]
         public async Task<ActionResult> GetFullList([FromQuery] int year, string? order)
         {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var isAuthenticated = !string.IsNullOrEmpty(userId);
+
             if (year == 0) year = 2024;
 
             var previousYear = year - 1;
@@ -142,7 +161,9 @@ namespace TemplateJwtProject.Controllers
 
                     PositionDifference = lastYearPosition.HasValue
                         ? (lastYearPosition.Value - t.Position).ToString()
-                        : "Nieuw"
+                        : "Nieuw",
+                    IsLiked = isAuthenticated && _context.UserPlaylists.Any(up => up.UserId == userId && up.SongId == s.SongId)
+
                 };
 
             if (!string.IsNullOrEmpty(order))
