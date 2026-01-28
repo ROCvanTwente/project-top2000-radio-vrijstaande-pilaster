@@ -56,23 +56,20 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-
-// CORS configuratie
-var corsSettings = builder.Configuration.GetSection("CorsSettings");
-var allowedOrigins = corsSettings.GetSection("AllowedOrigins").Get<string[]>() ?? new[] { "http://localhost:5173" };
-
+// CORS configuratie - USE CONFIG VALUES!
+var allowedOrigins = builder.Configuration.GetSection("CorsSettings:AllowedOrigins").Get<string[]>() 
+    ?? new[] { "http://localhost:5173" };
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("ReactAppPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins(allowedOrigins)
           .AllowAnyMethod()
           .AllowAnyHeader();
             /*.AllowCredentials();*/
     });
 });
-
 
 // Services
 builder.Services.AddScoped<IJwtService, JwtService>();
@@ -97,11 +94,13 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+// HTTPS Redirection - Only in Development (MonsterASP.NET handles SSL)
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
 // CORS middleware (voor Authentication en Authorization!)
-/*app.UseCors("DefaultCorsPolicy");*/
-
-app.UseHttpsRedirection();
-
 app.UseCors("ReactAppPolicy");
 
 app.UseAuthentication();
