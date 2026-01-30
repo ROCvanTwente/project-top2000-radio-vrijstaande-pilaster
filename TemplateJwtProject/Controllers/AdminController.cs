@@ -173,6 +173,7 @@ public class AdminController : ControllerBase
 
         var playlists = _context.UserPlaylists.Where(up => up.UserId == userId);
         _context.UserPlaylists.RemoveRange(playlists);
+        await _context.SaveChangesAsync();
 
         var result = await _userManager.DeleteAsync(user);
 
