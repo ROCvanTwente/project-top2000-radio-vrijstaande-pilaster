@@ -41,15 +41,6 @@ public class AuthController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var userFound = await _userManager.FindByEmailAsync(model.Email);
-        if (userFound != null)
-        {
-            return BadRequest(new
-            {
-                errors = "Email is already registered"
-            });
-        }
-
         var user = new ApplicationUser
         {
             UserName = model.Email,
@@ -93,14 +84,14 @@ public class AuthController : ControllerBase
         var user = await _userManager.FindByEmailAsync(model.Email);
         if (user == null)
         {
-            return Unauthorized(new { message = "Invalid email or password" });
+            return Unauthorized(new { message = "Ongeldig e-mailadres of wachtwoord" });
         }
 
         var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
         
         if (!result.Succeeded)
         {
-            return Unauthorized(new { message = "Invalid email or password" });
+            return Unauthorized(new { message = "Ongeldig e-mailadres of wachtwoord" });
         }
 
         var token = await _jwtService.GenerateTokenAsync(user);
@@ -129,7 +120,7 @@ public class AuthController : ControllerBase
 
         if (refreshToken == null)
         {
-            return Unauthorized(new { message = "Invalid or expired refresh token" });
+            return Unauthorized(new { message = "Ongeldig of verlopen vernieuwingstoken" });
         }
 
         var user = refreshToken.User;
@@ -186,6 +177,6 @@ public class AuthController : ControllerBase
 
         _logger.LogInformation("User {UserId} logged out from all devices", userId);
 
-        return Ok(new { message = "Logged out from all devices successfully" });
+        return Ok(new { message = "Succesvol uit alle systemen uitgelogd" });
     }
 }

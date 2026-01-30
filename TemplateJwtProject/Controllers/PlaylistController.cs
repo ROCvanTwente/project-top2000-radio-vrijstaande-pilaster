@@ -31,7 +31,7 @@ namespace TemplateJwtProject.Controllers
                 .AnyAsync(up => up.UserId == userId && up.SongId == request.SongId);
 
             if (exists)
-                return BadRequest("Song already in playlist");
+                return BadRequest("Nummer staat al in playlist!");
 
             _context.UserPlaylists.Add(new UserPlaylists
             {

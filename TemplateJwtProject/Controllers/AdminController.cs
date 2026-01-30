@@ -40,14 +40,14 @@ public class AdminController : ControllerBase
         var user = await _userManager.FindByEmailAsync(model.Email);
         if (user == null)
         {
-            return NotFound(new { message = "User not found" });
+            return NotFound(new { message = "Gebruiker niet gevonden" });
         }
 
         if (user.Id == currentUserId)
         {
             return BadRequest(new
             {
-                message = "You cannot change roles on your own account."
+                message = "Rollen van het huidig ingelogde account mogen niet worden aangepast."
             });
         }
 
@@ -55,7 +55,7 @@ public class AdminController : ControllerBase
         {
             return BadRequest(new
             {
-                message = $"Invalid role. Valid roles are: {Roles.Admin}, {Roles.User}"
+                message = $"Ongeldige rol, Geldige rollen zijn: {Roles.Admin}, {Roles.User}"
             });
         }
 
@@ -63,7 +63,7 @@ public class AdminController : ControllerBase
         {
             return BadRequest(new
             {
-                message = $"User already has the {model.Role} role"
+                message = $"Gebruiker heeft de {model.Role} rol al"
             });
         }
 
@@ -73,7 +73,7 @@ public class AdminController : ControllerBase
         {
             return BadRequest(new
             {
-                message = "Failed to assign role",
+                message = "Toevoegen van rol mislukt",
                 errors = result.Errors
             });
         }
@@ -82,7 +82,7 @@ public class AdminController : ControllerBase
 
         return Ok(new
         {
-            message = $"Role {model.Role} assigned successfully",
+            message = $"{model.Role} rol succesvol toegevoegd",
             email = user.Email,
             roles
         });
@@ -106,14 +106,14 @@ public class AdminController : ControllerBase
         var user = await _userManager.FindByEmailAsync(model.Email);
         if (user == null)
         {
-            return NotFound(new { message = "User not found" });
+            return NotFound(new { message = "Gebruiker niet gevonden" });
         }
 
         if (user.Id == currentUserId)
         {
             return BadRequest(new
             {
-                message = "You cannot change roles on your own account."
+                message = "Rollen van het huidig ingelogde account mogen niet worden aangepast."
             });
         }
 
@@ -121,7 +121,7 @@ public class AdminController : ControllerBase
         {
             return BadRequest(new
             {
-                message = $"User does not have the {model.Role} role"
+                message = $"Gebruiker heeft de {model.Role} rol niet."
             });
         }
 
@@ -131,7 +131,7 @@ public class AdminController : ControllerBase
         {
             return BadRequest(new
             {
-                message = "Failed to remove role",
+                message = "Mislukt om rol te verwijderen",
                 errors = result.Errors
             });
         }
@@ -140,7 +140,7 @@ public class AdminController : ControllerBase
 
         return Ok(new
         {
-            message = $"Role {model.Role} removed successfully",
+            message = $"{model.Role} rol succesvol verwijderd",
             email = user.Email,
             roles
         });
@@ -181,14 +181,14 @@ public class AdminController : ControllerBase
         {
             return BadRequest(new
             {
-                message = "You cannot delete your own account."
+                message = "Je kunt je eigen account niet verwijderen."
             });
         }
 
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
         {
-            return NotFound(new { message = "User not found" });
+            return NotFound(new { message = "Gebruiker niet gevonden" });
         }
 
         var result = await _userManager.DeleteAsync(user);
@@ -197,7 +197,7 @@ public class AdminController : ControllerBase
         {
             return BadRequest(new
             {
-                message = "Failed to delete user",
+                message = "Verwijderen van gebruiker mislukt",
                 errors = result.Errors
             });
         }
@@ -205,7 +205,7 @@ public class AdminController : ControllerBase
 
         return Ok(new
         {
-            message = "User deleted successfully",
+            message = "Gebruiker succesvol verwijderd.",
             userId
         });
     }

@@ -41,7 +41,7 @@ public class StatsController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = "Failed to load biggest drops", error = ex.Message });
+            return StatusCode(500, new { message = "Laden van grootste dalers mislukt", error = ex.Message });
         }
     }
 
@@ -69,7 +69,7 @@ public class StatsController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = "Failed to load biggest rises", error = ex.Message });
+            return StatusCode(500, new { message = "Laden van grootste stijgers mislukt", error = ex.Message });
         }
     }
 
@@ -93,7 +93,7 @@ public class StatsController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = "Failed to load ever-present songs", error = ex.Message });
+            return StatusCode(500, new { message = "Laden van nummers die altijd in de lijst stonden mislukt", error = ex.Message });
         }
     }
 
@@ -119,7 +119,7 @@ public class StatsController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = "Failed to load new entries", error = ex.Message });
+            return StatusCode(500, new { message = "Laden van nieuwe binnenkomers mislukt", error = ex.Message });
         }
     }
 
@@ -145,7 +145,7 @@ public class StatsController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = "Failed to load dropouts", error = ex.Message });
+            return StatusCode(500, new { message = "Laden van verdwenen nummers mislukt", error = ex.Message });
         }
     }
 
@@ -175,7 +175,7 @@ public class StatsController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = "Failed to load re-entries", error = ex.Message });
+            return StatusCode(500, new { message = "Laden van opnieuw binnengekomen nummers mislukt", error = ex.Message });
         }
     }
 
@@ -201,7 +201,7 @@ public class StatsController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = "Failed to load unchanged positions", error = ex.Message });
+            return StatusCode(500, new { message = "Laden van nummers met ongewijzigde positie mislukt", error = ex.Message });
         }
     }
 
@@ -229,7 +229,7 @@ public class StatsController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = "Failed to load consecutive artist positions", error = ex.Message });
+            return StatusCode(500, new { message = "Laden van opeenvolgende posities van artiesten mislukt", error = ex.Message });
         }
     }
 
@@ -257,7 +257,7 @@ public class StatsController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = "Failed to load one-timers", error = ex.Message });
+            return StatusCode(500, new { message = "Laden van eenmalige noteringen mislukt", error = ex.Message });
         }
     }
 
@@ -285,7 +285,7 @@ public class StatsController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = "Failed to load top artists", error = ex.Message });
+            return StatusCode(500, new { message = "Laden van topartiesten mislukt", error = ex.Message });
         }
     }
 
