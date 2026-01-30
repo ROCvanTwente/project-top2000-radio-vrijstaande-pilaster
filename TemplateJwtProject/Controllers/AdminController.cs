@@ -5,6 +5,7 @@ using TemplateJwtProject.Constants;
 using TemplateJwtProject.Models;
 using TemplateJwtProject.Models.DTOs;
 using System.Security.Claims;
+using TemplateJwtProject.Data;
 
 namespace TemplateJwtProject.Controllers;
 
@@ -15,13 +16,16 @@ public class AdminController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ILogger<AdminController> _logger;
+    private readonly AppDbContext _context;
 
     public AdminController(
         UserManager<ApplicationUser> userManager,
+        AppDbContext context,
         ILogger<AdminController> logger)
     {
         _userManager = userManager;
         _logger = logger;
+        _context = context;
     }
 
     [HttpPost("assign-role")]
@@ -88,7 +92,6 @@ public class AdminController : ControllerBase
         });
     }
 
-
     [HttpPost("remove-role")]
     public async Task<IActionResult> RemoveRole([FromBody] AssignRoleDto model)
     {
@@ -146,29 +149,6 @@ public class AdminController : ControllerBase
         });
     }
 
-
-    [HttpGet("users")]
-    public async Task<IActionResult> GetAllUsers()
-    {
-        var users = _userManager.Users.ToList();
-        
-        var userList = new List<object>();
-        
-        foreach (var user in users)
-        {
-            var roles = await _userManager.GetRolesAsync(user);
-            userList.Add(new
-            {
-                id = user.Id,
-                email = user.Email,
-                userName = user.UserName,
-                roles = roles
-            });
-        }
-
-        return Ok(userList);
-    }
-
     [HttpDelete("delete-user/{userId}")]
     public async Task<IActionResult> DeleteUser(string userId)
     {
@@ -191,6 +171,9 @@ public class AdminController : ControllerBase
             return NotFound(new { message = "Gebruiker niet gevonden" });
         }
 
+        var playlists = _context.UserPlaylists.Where(up => up.UserId == userId);
+        _context.UserPlaylists.RemoveRange(playlists);
+
         var result = await _userManager.DeleteAsync(user);
 
         if (!result.Succeeded)
@@ -202,7 +185,6 @@ public class AdminController : ControllerBase
             });
         }
 
-
         return Ok(new
         {
             message = "Gebruiker succesvol verwijderd.",
@@ -210,4 +192,25 @@ public class AdminController : ControllerBase
         });
     }
 
+    [HttpGet("users")]
+    public async Task<IActionResult> GetAllUsers()
+    {
+        var users = _userManager.Users.ToList();
+        
+        var userList = new List<object>();
+        
+        foreach (var user in users)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+            userList.Add(new
+            {
+                id = user.Id,
+                email = user.Email,
+                userName = user.UserName,
+                roles = roles
+            });
+        }
+
+        return Ok(userList);
+    }
 }
