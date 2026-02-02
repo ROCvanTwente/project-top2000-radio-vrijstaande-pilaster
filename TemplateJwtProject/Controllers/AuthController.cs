@@ -179,4 +179,12 @@ public class AuthController : ControllerBase
 
         return Ok(new { message = "Succesvol uit alle systemen uitgelogd" });
     }
+
+    [Authorize]
+    [HttpGet("me")]
+    public IActionResult Me()
+    {
+        return Ok(new { authenticated = true });
+    }
+
 }
