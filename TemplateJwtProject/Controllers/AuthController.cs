@@ -71,7 +71,7 @@ public class AuthController : ControllerBase
             RefreshToken = refreshToken.Token,
             Email = user.Email ?? string.Empty,
             Roles = roles.ToList(),
-            ExpiresAt = DateTime.UtcNow.AddMinutes(60)
+            ExpiresAt = DateTime.UtcNow.AddMinutes(5)
         });
     }
 
@@ -106,7 +106,7 @@ public class AuthController : ControllerBase
             RefreshToken = refreshToken.Token,
             Email = user.Email ?? string.Empty,
             Roles = roles.ToList(),
-            ExpiresAt = DateTime.UtcNow.AddMinutes(60)
+            ExpiresAt = DateTime.UtcNow.AddMinutes(5)
         });
     }
 
@@ -144,7 +144,7 @@ public class AuthController : ControllerBase
             RefreshToken = newRefreshToken.Token,
             Email = user.Email ?? string.Empty,
             Roles = roles.ToList(),
-            ExpiresAt = DateTime.UtcNow.AddMinutes(60)
+            ExpiresAt = DateTime.UtcNow.AddMinutes(5)
         });
     }
 
