@@ -29,7 +29,7 @@ public class JwtService : IJwtService
         var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey is not configured");
         var issuer = jwtSettings["Issuer"] ?? throw new InvalidOperationException("JWT Issuer is not configured");
         var audience = jwtSettings["Audience"] ?? throw new InvalidOperationException("JWT Audience is not configured");
-        var expiryInMinutes = int.Parse(jwtSettings["ExpiryInMinutes"] ?? "60");
+        var expiryInMinutes = int.Parse(jwtSettings["ExpiryInMinutes"] ?? "5");
 
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
